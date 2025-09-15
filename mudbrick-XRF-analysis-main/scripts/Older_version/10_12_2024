@@ -1,0 +1,201 @@
+# =========================================================================
+# PCA Analysis of XRF Data from Archaeological Mudbricks
+# =========================================================================
+# Description: This script performs Principal Component Analysis (PCA) on XRF 
+# (X-Ray Fluorescence) data from archaeological mudbrick samples. It includes
+# data preprocessing, PCA computation, and visualization with confidence 
+# ellipses and variable loadings.
+#
+# Data: XRF analysis of mudbrick samples measuring oxide concentrations (SiO2,
+# Al2O3, Fe2O3, MgO, CaO, Na2O, K2O)
+#
+# Credits: Francesco Santoro De Vico
+# Citation: write on my mail fsdv.edu@gmail.com
+# =========================================================================
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
+import scipy.stats as stats
+
+# Set global plotting parameters
+plt.style.use('default')
+plt.rcParams['font.family'] = 'DejaVu Sans'  # Set font for better readability
+plt.rcParams['axes.facecolor'] = '#f0f0f0'   # Light grey background
+plt.rcParams['figure.facecolor'] = 'white'   # White figure background
+
+# Define the dataset
+# Each sample represents a mudbrick with its chemical composition in oxides (%)
+data = {
+    'Sample': ['43', '44', '45', '46', '47', '48', '49', '50', '51', '52', '53', '54', '55', 
+               '56', '57', '58', '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', 
+               '69', '79', '80', 'SG22E302/9'],
+    'SiO2': [41.72, 39.04, 38.40, 41.72, 42.01, 39.80, 40.56, 40.40, 40.02, 39.12, 40.65, 
+             41.77, 42.06, 42.17, 41.93, 39.45, 40.98, 38.62, 43.44, 43.70, 43.69, 44.71, 
+             38.32, 43.66, 42.23, 40.47, 44.19, 40.55, 41.25, 40.05],
+    'Al2O3': [9.42, 10.09, 9.16, 9.49, 9.72, 9.60, 9.33, 9.45, 11.00, 10.55, 9.28, 9.72, 
+              9.65, 12.89, 9.87, 9.47, 9.74, 10.32, 8.86, 8.84, 8.76, 8.89, 8.40, 9.41, 
+              12.47, 11.53, 8.70, 9.99, 10.14, 9.93],
+    'Fe2O3': [5.16, 5.03, 5.21, 5.20, 5.35, 5.50, 5.22, 5.54, 5.83, 5.53, 5.14, 5.46, 5.32, 
+              6.77, 5.57, 5.40, 5.59, 5.41, 4.12, 4.10, 4.00, 4.04, 4.19, 4.68, 6.60, 6.16, 
+              3.95, 5.57, 5.71, 5.55],
+    'MgO': [5.98, 4.35, 6.01, 6.05, 5.87, 6.45, 6.41, 5.88, 5.33, 5.14, 6.50, 6.22, 5.81, 
+            5.67, 6.04, 6.33, 6.30, 5.16, 4.99, 4.96, 4.95, 4.85, 5.58, 4.98, 5.46, 5.39, 
+            4.85, 6.07, 6.10, 5.98],
+    'CaO': [14.84, 16.64, 14.23, 14.53, 13.98, 14.61, 14.54, 14.76, 14.48, 15.57, 14.11, 
+            15.10, 14.27, 10.58, 14.22, 14.85, 15.20, 16.87, 15.99, 15.43, 15.98, 15.67, 
+            17.31, 16.07, 11.72, 14.42, 15.99, 15.71, 15.38, 14.55],
+    'Na2O': [2.74, 2.07, 4.16, 2.55, 2.75, 2.88, 2.53, 2.63, 1.57, 1.80, 2.67, 2.10, 2.78, 
+             2.25, 2.35, 2.97, 2.25, 1.75, 2.38, 2.79, 2.55, 2.53, 2.65, 1.94, 1.90, 1.89, 
+             2.51, 1.73, 1.57, 2.17],
+    'K2O': [1.59, 1.96, 1.49, 1.63, 1.61, 1.57, 1.66, 1.58, 2.17, 2.02, 1.65, 1.56, 1.58, 
+            2.59, 1.64, 1.57, 1.55, 1.95, 1.63, 1.62, 1.58, 1.57, 1.70, 1.71, 2.50, 2.28, 
+            1.55, 1.87, 1.88, 1.98]
+}
+
+# Create DataFrame and prepare data for PCA
+df = pd.DataFrame(data)
+X = df.drop('Sample', axis=1)  # Remove sample labels
+feature_names = X.columns
+X_scaled = StandardScaler().fit_transform(X)  # Standardize features
+
+# Perform PCA
+pca = PCA()
+X_pca = pca.fit_transform(X_scaled)
+explained_variance_ratio = pca.explained_variance_ratio_ * 100
+
+# Define function for calculating confidence ellipse (95.5% confidence interval)
+def get_confidence_ellipse(x, y, confidence=0.955):
+    """
+    Calculate the parameters for plotting confidence ellipse.
+    
+    Args:
+        x, y: Arrays of coordinates
+        confidence: Confidence level (default: 0.955 for 2 standard deviations)
+    
+    Returns:
+        width, height: Dimensions of the ellipse
+        angle: Rotation angle in degrees
+    """
+    cov = np.cov(x, y)
+    pearson = cov[0, 1]/np.sqrt(cov[0, 0] * cov[1, 1])
+    chi2_val = stats.chi2.ppf(confidence, 2)
+    
+    eigenvals, eigenvecs = np.linalg.eig(cov)
+    sort_indices = np.argsort(eigenvals)[::-1]
+    eigenvals = eigenvals[sort_indices]
+    eigenvecs = eigenvecs[:, sort_indices]
+    
+    angle = np.degrees(np.arctan2(eigenvecs[1, 0], eigenvecs[0, 0]))
+    width, height = 2 * np.sqrt(chi2_val * eigenvals)
+    
+    return width, height, angle
+
+# Create enhanced PCA plot
+plt.figure(figsize=(15, 10))
+
+# Set up color scheme
+colors = plt.cm.tab20(np.linspace(0, 1, len(df['Sample'])))
+
+# Add confidence ellipse
+width, height, angle = get_confidence_ellipse(X_pca[:, 0], X_pca[:, 1])
+ellipse = Ellipse(xy=(np.mean(X_pca[:, 0]), np.mean(X_pca[:, 1])),
+                  width=width, height=height,
+                  angle=angle,
+                  fill=False,
+                  linestyle='--',
+                  color='gray',
+                  linewidth=2,
+                  label='95.5% Confidence Ellipse')
+plt.gca().add_patch(ellipse)
+
+# Plot samples
+scatter = plt.scatter(X_pca[:, 0], X_pca[:, 1], 
+                     c=colors,
+                     s=100,
+                     alpha=0.7,
+                     edgecolor='white',
+                     linewidth=1)
+
+# Add sample labels with improved visibility
+for i, sample in enumerate(df['Sample']):
+    plt.annotate(sample, 
+                (X_pca[i, 0], X_pca[i, 1]),
+                xytext=(7, 7),
+                textcoords='offset points',
+                fontsize=9,
+                bbox=dict(facecolor='white',
+                         edgecolor='none',
+                         alpha=0.7,
+                         pad=1),
+                zorder=5)
+
+# Add vectors showing original variables contribution
+scaling_factor = 4  # Adjust vector length for visibility
+for i, feature in enumerate(feature_names):
+    plt.arrow(0, 0,
+             pca.components_[0, i] * scaling_factor,
+             pca.components_[1, i] * scaling_factor,
+             color='darkred',
+             alpha=0.8,
+             width=0.02,
+             head_width=0.15,
+             head_length=0.15,
+             zorder=4)
+    
+    # Add variable labels
+    plt.annotate(feature,
+                (pca.components_[0, i] * scaling_factor * 1.2,
+                 pca.components_[1, i] * scaling_factor * 1.2),
+                fontsize=10,
+                color='darkred',
+                fontweight='bold',
+                bbox=dict(facecolor='white',
+                         edgecolor='none',
+                         alpha=0.7,
+                         pad=1),
+                zorder=5)
+
+# Customize plot appearance
+plt.xlabel(f'Principal Component 1 ({explained_variance_ratio[0]:.1f}%)',
+          fontsize=12, fontweight='bold')
+plt.ylabel(f'Principal Component 2 ({explained_variance_ratio[1]:.1f}%)',
+          fontsize=12, fontweight='bold')
+plt.title('Principal Component Analysis (PCA) of Chemical Composition',
+          fontsize=14, fontweight='bold', pad=20)
+
+# Add visual elements for better readability
+plt.grid(True, linestyle='--', alpha=0.3)
+plt.axhline(y=0, color='black', linestyle='-', alpha=0.3, zorder=1)
+plt.axvline(x=0, color='black', linestyle='-', alpha=0.3, zorder=1)
+plt.legend(loc='upper right')
+
+# Customize axes appearance
+ax = plt.gca()
+for spine in ax.spines.values():
+    spine.set_edgecolor('#333333')
+    spine.set_linewidth(1)
+
+# Adjust layout and save plot
+plt.tight_layout()
+plt.savefig('pca_analysis_enhanced.png', 
+            dpi=300, 
+            bbox_inches='tight',
+            facecolor='white')
+plt.close()
+
+# Print analysis results
+print("\nExplained variance by principal components:")
+for i, var in enumerate(explained_variance_ratio):
+    print(f"PC{i+1}: {var:.1f}%")
+
+print("\nVariable loadings:")
+loadings = pd.DataFrame(
+    pca.components_.T,
+    columns=[f'PC{i+1}' for i in range(len(feature_names))],
+    index=feature_names
+)
+print(loadings)
