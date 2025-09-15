@@ -48,6 +48,6 @@ For use in manuscript submissions:
 
 ---
 
-**Repository maintained by**: Francesci Santoro De Vico
+**Repository maintained by**: Francesco Santoro De Vico
 **Institution**: University of Padova
 **ORCIID**: 0000-0002-8429-0345
