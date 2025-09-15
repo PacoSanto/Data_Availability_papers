@@ -3,7 +3,7 @@
 Analysis and raw data of the paper submitted at Communications Earth & Environment
 
 ## Project Structure
-- `data/`: Raw data on OriginPro format
+- `data/`: Raw data on OriginPro format (.opju)
 - `scripts/`: Analysis scripts (if there are)
 - `results/`: Output figures and analysis results presented in the paper. (will be update after the pubblication)
 - `docs/`: Detailed documentation, if any.
