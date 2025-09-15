@@ -5,7 +5,7 @@ Analysis and raw data of the paper submitted at Communications Earth & Environme
 ## Project Structure
 - `data/`: Raw data on OriginPro format
 - `scripts/`: Analysis scripts (if there are)
-- `results/`: Output figures and analysis results presented in the paper
+- `results/`: Output figures and analysis results presented in the paper. (will be update after the pubblication)
 - `docs/`: Detailed documentation, if any.
 
 ## Requirements
