@@ -17,6 +17,7 @@ See `docs/usage_guide.md` for detailed instructions.
 
 ## Credits
 [Francesco Santoro De Vico](https://www.linkedin.com/in/francesco-santoro-geo/)
+[Luca Volpi](https://www.linkedin.com/in/luca-volpi-885015227/)
 
 ## Citation
 [Article in progress Volpi et al. 2025]
