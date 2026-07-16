@@ -176,6 +176,9 @@ Results are in review.
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
+Please cite this paper now in revision called The geology of a Dark Mantle Deposit near the Carpatus Mons on the Moon, its ISRU potential, and the design of an exploration traverse. First author of the paper is Javier Eduardo Suárez-Valencia
+
+
 ---
 
 ## Contact
@@ -183,6 +186,10 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 For questions or collaborations:
 
 - **Author**: [Francesco Santoro De Vico] - [francesco.santoro@unipd.it]
+
+- **First Author paper**: [Javier Eduardo Suárez-Valencia] - [javier.suarez@unipd.it]
+  
+- **Corresponding Author paper**: [Giacomo Melchiori] - [giacomo.melchiori@phd.unipd.it]
 
 ---
 
